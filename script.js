@@ -87,10 +87,18 @@ displayMovements(account1.movements);
 const createUsername = function (accs) {
   accs.forEach(function (acc) {
     acc.username = acc.owner
-      .toLowerCase(user)
+      .toLowerCase()
       .split(' ')
       .map(word => word[0])
       .join('');
   });
 };
 createUsername(accounts);
+
+// CALC DISPLAY BALANCE
+const calcDisplayBalance = function (movements) {
+  const balance = movements.reduce((acc, curr) => acc + curr, 0);
+
+  labelBalance.textContent = `${balance} EUR`;
+};
+calcDisplayBalance(account1.movements);
