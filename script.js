@@ -61,7 +61,7 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-//
+// DISPLAY MOVEMENTS (DEPOSITED/WITHDRAWLS)
 const displayMovements = function (movements) {
   containerMovements.innerHTML = ''; // This is the same as textContent but with innerHTML we grab the whole HTML data and we set it
   // to '' empty.
@@ -82,3 +82,15 @@ const displayMovements = function (movements) {
   });
 };
 displayMovements(account1.movements);
+
+// CREATING USERNAME
+const createUsername = function (accs) {
+  accs.forEach(function (acc) {
+    acc.username = acc.owner
+      .toLowerCase(user)
+      .split(' ')
+      .map(word => word[0])
+      .join('');
+  });
+};
+createUsername(accounts);
