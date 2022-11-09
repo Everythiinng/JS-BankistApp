@@ -61,7 +61,21 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-// DISPLAY MOVEMENTS (DEPOSITED/WITHDRAWLS)
+let currentAccount;
+
+// CREATING USERNAME
+const createUsername = function (accs) {
+  accs.forEach(function (acc) {
+    acc.username = acc.owner
+      .toLowerCase()
+      .split(' ')
+      .map(word => word[0])
+      .join('');
+  });
+};
+createUsername(accounts);
+
+// CALC DISPLAY MOVEMENTS (DEPOSITED/WITHDRAWLS)
 const displayMovements = function (movements) {
   containerMovements.innerHTML = ''; // This is the same as textContent but with innerHTML we grab the whole HTML data and we set it
   // to '' empty.
@@ -81,19 +95,6 @@ const displayMovements = function (movements) {
     containerMovements.insertAdjacentHTML('afterbegin', html);
   });
 };
-displayMovements(account1.movements);
-
-// CREATING USERNAME
-const createUsername = function (accs) {
-  accs.forEach(function (acc) {
-    acc.username = acc.owner
-      .toLowerCase()
-      .split(' ')
-      .map(word => word[0])
-      .join('');
-  });
-};
-createUsername(accounts);
 
 // CALC DISPLAY BALANCE
 const calcDisplayBalance = function (movements) {
@@ -101,25 +102,54 @@ const calcDisplayBalance = function (movements) {
 
   labelBalance.textContent = `${balance} EUR`;
 };
-calcDisplayBalance(account1.movements);
 
 // CALC DISPLAY SUMMARY
-const calcDisplaySummary = function (movements) {
-  const incomes = movements
+const calcDisplaySummary = function (acc) {
+  const incomes = acc.movements
     .filter(mov => mov > 0)
     .reduce((acc, curr) => acc + curr, 0);
   labelSumIn.textContent = incomes;
 
-  const outcomes = movements
+  const outcomes = acc.movements
     .filter(mov => mov < 0)
     .reduce((acc, curr) => acc + curr, 0);
   labelSumOut.textContent = `${Math.abs(outcomes)}`;
 
-  const interest = movements
+  const interest = acc.movements
     .filter(mov => mov > 0)
-    .map(deposit => (deposit * 1.2) / 100)
+    .map(deposit => (deposit * acc.interestRate) / 100)
     .filter(int => int >= 1)
     .reduce((acc, curr) => acc + curr, 0);
   labelSumInterest.textContent = interest;
 };
-calcDisplaySummary(account1.movements);
+
+// LOGIN FEATURE/FUNCTIONALITY
+btnLogin.addEventListener('click', function (e) {
+  e.preventDefault(); // Prevents the form from submitting
+
+  currentAccount = accounts.find(
+    acc => acc.username === inputLoginUsername.value
+  );
+  // We do optional chaining with a '?' in the currentAccount.
+  // We do this because it will throw an error if we give a wrong account username because there wont be a currentAccount
+  // With this we ask if its true, if its found an account, then see the pin
+  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    // Display UI and welcome message
+    labelWelcome.textContent = `Welcome back ${
+      currentAccount.owner.split(' ')[0]
+    }`;
+    containerApp.style.opacity = 100;
+    // Display Movements
+    displayMovements(currentAccount.movements);
+
+    // Display Balance
+    calcDisplayBalance(currentAccount.movements);
+
+    // Display Summary
+    calcDisplaySummary(currentAccount);
+
+    // Clear input fields
+    inputLoginUsername.value = inputLoginPin.value = '';
+    inputLoginPin.blur(); // This will make the field lose its focus( removing the cursor from that field);
+  }
+});
